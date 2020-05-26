@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <record id="view_calendar_event_invoice_tree" model="ir.ui.view">
+        <field name="name">calendar.event.invoice.tree</field>
+        <field name="model">calendar.event</field>
+        <field name="inherit_id" ref="calendar.view_calendar_event_tree"/>
+        <field name="arch" type="xml">
+            <field name="location" position="after">
+                <field name="invoice_line_ids"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="calendar_event_invoice_form" model="ir.ui.view">
+        <field name="name">calendar.event.invoice.form</field>
+        <field name="model">calendar.event</field>
+        <field name="inherit_id" ref="calendar.view_calendar_event_form"/>
+        <field name="arch" type="xml">
+            <page name="page_misc" position="before">
+                <page name="page_invoices" string="Invoices">
+                    <button type="object" name="action_create_invoice"
+                            string="Create Invoice"/>
+                    <br/>
+                    <field name="invoice_line_ids" nolabel="1">
+                        <tree name="lines_tree" string="Invoice Lines"
+                              create="false" editable="bottom">
+                            <field name="invoice_id"/>
+                            <field name="name"/>
+                            <field name="price_total"/>
+                            <field name="partner_id"/>
+                            <field name="date_invoice"/>
+                        </tree>
+                        <form name="lines_form" string="Invoice Lines">
+                            <sheet>
+                                <group>
+                                    <field name="invoice_id"/>
+                                    <field name="name"/>
+                                    <field name="price_total"/>
+                                    <field name="partner_id"/>
+                                    <field name="date_invoice"/>
+                                </group>
+                            </sheet>
+                        </form>
+                    </field>
+                </page>
+            </page>
+        </field>
+    </record>
+
+    <record id="action_server_event_to_invoice" model="ir.actions.server">
+        <field name="name">Create Invoice</field>
+        <field name="model_id" ref="calendar.model_calendar_event"/>
+        <field name="binding_model_id" ref="calendar.model_calendar_event"/>
+        <field name="state">code</field>
+        <field name="code">records.action_create_invoice()</field>
+    </record>
+
+</odoo>
