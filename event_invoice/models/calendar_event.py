@@ -77,10 +77,10 @@ class Meeting(models.Model):
 
         # parse event description and update location
         for event in self:
-            m = re.match(r'^Address: (.+)$', event.description)
+            m = re.findall(r"^Address: (.+)$", event.description, re.MULTILINE)
             address = False
-            if m and len(m.groups()) == 1:
-                address = m.group(1) or False
+            if len(m) == 1:
+                address = m[0] or False
             event.location = address
 
         # get partner
