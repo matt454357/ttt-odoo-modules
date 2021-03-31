@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <record model="ir.ui.view" id="view_voucher_attachments_tree">
+        <field name="name">account.voucher.attachments.tree</field>
+        <field name="model">account.voucher</field>
+        <field name="inherit_id" ref="account_voucher.view_voucher_tree"/>
+        <field name="arch" type="xml">
+            <field name="state" position="before">
+                <field name="attachment_ids"/>
+            </field>
+        </field>
+    </record>
+
+</odoo>
