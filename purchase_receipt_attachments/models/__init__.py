@@ -1,1 +1,1 @@
-from . import account_voucher
+from . import purchase_receipt

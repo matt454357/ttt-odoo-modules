@@ -4,7 +4,7 @@
 {
     "name": "Invoice Calendar Events",
     "summary": "Link events to invoice lines.",
-    "version": "12.0.1.0.0",
+    "version": "15.0.1.0.0",
     "development_status": "Beta",
     "author": "Matt Taylor",
     "website": "https://github.com/matt454357/ttt-odoo-modules",

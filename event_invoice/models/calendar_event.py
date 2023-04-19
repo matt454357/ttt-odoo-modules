@@ -63,7 +63,6 @@ class Meeting(models.Model):
         }
         return line_vals
 
-    @api.multi
     def action_create_invoice(self):
         if len(set(self.mapped('name'))) != 1:
             raise UserError("You can only generate an invoice for one "
