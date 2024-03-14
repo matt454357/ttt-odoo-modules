@@ -124,6 +124,7 @@ class Meeting(models.Model):
             'view_mode': 'form',
             'res_model': 'account.move',
             'view_id': self.env.ref('account.view_move_form').id,
+            'context': "{'default_move_type': 'out_invoice'}",
             'target': 'current',
             'res_id': invoice.id,
             }
