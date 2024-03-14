@@ -1,0 +1,3 @@
+id,name,model_id/id,group_id/id,perm_read,perm_write,perm_create,perm_unlink
+access_expensify_account,access.expensify.account,model_expensify_account,account.group_account_user,1,1,1,1
+access_expensify_log,access.expensify.log,model_expensify_log,account.group_account_user,1,1,1,1
