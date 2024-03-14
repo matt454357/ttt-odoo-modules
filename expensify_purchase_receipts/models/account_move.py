@@ -12,7 +12,7 @@ class AccountMove(models.Model):
 
     def action_post(self):
         # don't post purchase receipts without a vendor
-        if self.move_type == 'in_receipt':
+        if self.move_type == 'in_receipt' and not self.partner_id:
             raise UserError("A vendor is required to post purchase receipts")
         res = super(AccountMove, self).action_post()
         return res
