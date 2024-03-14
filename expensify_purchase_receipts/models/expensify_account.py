@@ -172,7 +172,7 @@ class ExpensifyAccount(models.Model):
                 errors.append('Invalid Account')
 
             # validate merchant
-            dom = [('name', '=', exp_log['merchant'])]
+            dom = [('name', 'ilike', exp_log['merchant'])]
             partner_id = self.env['res.partner'].search(dom, limit=1)
             if partner_id:
                 if partner_id.parent_id:
