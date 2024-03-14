@@ -17,7 +17,7 @@
         <field name="model">calendar.event</field>
         <field name="inherit_id" ref="calendar.view_calendar_event_form"/>
         <field name="arch" type="xml">
-            <page name="page_misc" position="before">
+            <page name="page_invitations" position="after">
                 <page name="page_invoices" string="Invoices">
                     <button type="object" name="action_create_invoice"
                             string="Create Invoice"/>
@@ -25,20 +25,20 @@
                     <field name="invoice_line_ids" nolabel="1">
                         <tree name="lines_tree" string="Invoice Lines"
                               create="false" editable="bottom">
-                            <field name="invoice_id"/>
+                            <field name="move_id"/>
                             <field name="name"/>
                             <field name="price_total"/>
                             <field name="partner_id"/>
-                            <field name="date_invoice"/>
+                            <field name="date"/>
                         </tree>
                         <form name="lines_form" string="Invoice Lines">
                             <sheet>
                                 <group>
-                                    <field name="invoice_id"/>
+                                    <field name="move_id"/>
                                     <field name="name"/>
                                     <field name="price_total"/>
                                     <field name="partner_id"/>
-                                    <field name="date_invoice"/>
+                                    <field name="date"/>
                                 </group>
                             </sheet>
                         </form>
