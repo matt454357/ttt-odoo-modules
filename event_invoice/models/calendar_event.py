@@ -24,7 +24,7 @@ class Meeting(models.Model):
 
         # parse event description for email
         email = False
-        m = re.findall(r"Email: (.+?)<br>", self.description)
+        m = re.findall(r"Email:\s*([\w\-\.]+@[\w-]+\.+[\w-]{2,})", self.description)
         if len(m) == 1:
             email = m[0] or False
 
