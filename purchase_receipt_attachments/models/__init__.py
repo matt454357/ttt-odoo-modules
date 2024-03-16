@@ -1,1 +1,1 @@
-from . import purchase_receipt
+from . import account_move
