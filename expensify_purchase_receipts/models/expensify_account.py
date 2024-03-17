@@ -156,12 +156,16 @@ class ExpensifyAccount(models.Model):
                 'account_mail': exp['accountEmail'],
                 'expense_date': exp['modifiedCreated'] or exp['created'],
                 'merchant': exp['modifiedMerchant'] or exp['merchant'],
-                'amount': exp['modifiedAmount'] or exp['amount'],
                 'category': exp['category'],
                 'data': json.dumps(exp),
             }
 
+            # validate amount
+            amount = float(exp['modifiedAmount'] or exp['amount'] or 0.0) / 100.0
+            exp['amount'] = amount
+
             # validate GL account
+            account_id = None
             account_match = RE_CATEGORY.match(exp['category'])
             if account_match:
                 dom = [('code', '=', account_match.group(1))]
@@ -182,6 +186,38 @@ class ExpensifyAccount(models.Model):
             if not exp.get('partner_id'):
                 errors.append('Unmatched Merchant')
 
+            # prepare account move data
+            if amount > 0.0:
+                debit = amount
+                credit = 0.0
+                move_type = 'in_receipt'
+            else:
+                debit = 0.0
+                credit = -amount
+                move_type = 'in_refund'
+
+            vals = {
+                'move_type': move_type,
+                'partner_id': exp['partner_id'],
+                'partner_shipping_id': exp['partner_id'],
+                'invoice_date': exp['modifiedCreated'] or exp['created'],
+                'invoice_date_due': exp['modifiedCreated'] or exp['created'],
+                'company_id': self.env.user.company_id.id,
+                'journal_id': self.default_journal_id.id,
+                'narration': f"Expensify source: {exp['bank'] or 'Cash'}",
+                'expensify_ref': exp['transactionID'],
+                'invoice_line_ids': [(0, 0, {
+                    'name': account_id.name,
+                    'account_id': exp['account_id'],
+                    'quantity': 1.0,
+                    'discount': 0.0,
+                    'price_unit': abs(amount),
+                    'debit': debit,
+                    'credit': credit,
+                })],
+            }
+            exp['move_vals'] = vals
+
             # check for pre-existing import
             if exp['transactionID'] in expensify_refs:
                 errors.append('Already Imported')
@@ -194,24 +230,10 @@ class ExpensifyAccount(models.Model):
             log_entries.append(exp_log)
 
         if not error_count:
-            # create purchase receipts
+            # create Purchase Receipts
             for exp in data:
-                vals = {
-                    'move_type': 'in_receipt',
-                    'partner_id': exp['partner_id'],
-                    'invoice_date': exp['modifiedCreated'] or exp['created'],
-                    'date': exp['modifiedCreated'] or exp['created'],
-                    'journal_id': self.default_journal_id.id,
-                    'expensify_ref': exp['transactionID'],
-                    'line_ids': [(0, 0, {
-                        'name': 'Expensify Expense',
-                        'account_id': exp['account_id'],
-                        'quantity': 1.0,
-                        'discount': 0.0,
-                        'price_unit': float(exp['modifiedAmount'] or exp['amount'] or 0.0),
-                    })],
-                }
-                receipt = self.env['account.move'].create(vals)
+                move_vals = exp['move_vals']
+                receipt = self.env['account.move'].create(move_vals)
 
                 # attach the receipt image
                 if exp['receiptObject.url']:
@@ -219,14 +241,13 @@ class ExpensifyAccount(models.Model):
                     datas = base64.b64encode(response.content).decode('ascii')
                     if response.status_code == 200:
                         vals = {
-                            'name': file_nameexp['receiptFilename'],
-                            'datas_fname': exp['receiptFilename'],
+                            'name': exp['receiptFilename'],
                             'res_model': 'account.move',
                             'res_id': receipt.id,
                             'type': 'binary',
                             'datas': datas
                         }
-                        self.env['ir.attachments'].create(vals)
+                        self.env['ir.attachment'].create(vals)
 
                 # post the purchase receipt
                 receipt.action_post()
@@ -237,7 +258,7 @@ class ExpensifyAccount(models.Model):
 
             msg_type = 'notification'
             msg_title = 'Notification'
-            msg_message = (f"Imported {len(data)} transactions.")
+            msg_message = f"Imported {len(data)} transactions."
 
         else:
             msg_type = 'warning'
