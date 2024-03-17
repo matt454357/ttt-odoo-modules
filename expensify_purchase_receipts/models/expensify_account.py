@@ -148,6 +148,10 @@ class ExpensifyAccount(models.Model):
         error_count = 0
         log_entries = []
         for exp in data:
+            # check for pre-existing import
+            if exp['transactionID'] in expensify_refs:
+                continue
+
             errors = []
             exp_log = {
                 'account_id': self.id,
@@ -218,10 +222,6 @@ class ExpensifyAccount(models.Model):
             }
             exp['move_vals'] = vals
 
-            # check for pre-existing import
-            if exp['transactionID'] in expensify_refs:
-                errors.append('Already Imported')
-
             if errors:
                 error_count += 1
                 exp_log['errors'] = ", ".join(errors)
@@ -232,6 +232,9 @@ class ExpensifyAccount(models.Model):
         if not error_count:
             # create Purchase Receipts
             for exp in data:
+                if not exp.get('move_vals'):
+                    continue
+
                 move_vals = exp['move_vals']
                 receipt = self.env['account.move'].create(move_vals)
 
